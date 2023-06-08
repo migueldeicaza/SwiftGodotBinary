@@ -13,7 +13,7 @@ let package = Package(
     targets: [
         .binaryTarget(
             name: "SwiftGodot",
-            url: "https://github.com/migueldeicaza/SwiftGodot/releases/download/v0.12/SwiftGodot.xcframework.zip",
-            checksum: "29cb32168bf021db0b26200f981b4538f934ee049a2d673098ef8f69c93d281a")
+            url: "https://github.com/migueldeicaza/SwiftGodot/releases/download/v0.13/SwiftGodot.xcframework.zip",
+            checksum: "1554ea2a6fafe32ff411258a187ec3ec588278010af84a3c8a1ebb216d339384")
     ]
 )
