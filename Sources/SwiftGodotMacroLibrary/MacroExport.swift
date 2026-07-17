@@ -1,5 +1,5 @@
 //
-//  File.swift
+//  MacroExport.swift
 //  
 //
 //  Created by Miguel de Icaza on 9/25/23.
@@ -12,136 +12,97 @@ import SwiftSyntax
 import SwiftSyntaxBuilder
 import SwiftSyntaxMacros
 
-public struct GodotExport: PeerMacro {
-    
-    
-    static func makeGetAccessor (varName: String, isOptional: Bool) -> String {
-        let name = "_mproxy_get_\(varName)"
-        if isOptional {
-            return
-    """
-    func \(name) (args: [Variant]) -> Variant? {
-        guard let result = \(varName) else { return nil }
-        return Variant (result)
-    }
-    """
-        } else {
-            return
-    """
-    func \(name) (args: [Variant]) -> Variant? {
-        return Variant (\(varName))
-    }
-    """
-        }
-    }
-    
-    static func makeSetAccessor (varName: String, typeName: String, isOptional: Bool) -> String {
-        let name = "_mproxy_set_\(varName)"
-        var body: String = ""
-
-        if godotVariants [typeName] == nil {
-            let optBody = isOptional ? " else { \(varName) = nil }" : ""
-            body =
-    """
-        if let res: \(typeName) = args [0].asObject () {
-            \(varName) = res
-        }\(optBody)
-    """
-        } else {
-            if isOptional {
-                body =
-    """
-        if let v = args [0] {
-            \(varName) = \(typeName)(v)
-        } else {
-            \(varName) = nil
-        }
-    }
-    """
-            } else {
-                body =
-    """
-        \(varName) = \(typeName)(args [0])!
-    """
-            }
-            return "func \(name) (args: [Variant]) -> Variant? {\n\t/*\(body)*/\n\treturn nil\n}"
-        }
-        return "func \(name) (args: [Variant]) -> Variant? {\n\t\(body)\n\treturn nil\n}"
-    }
-
-    
+public struct GodotExport: PeerMacro {    
     public static func expansion(of node: SwiftSyntax.AttributeSyntax, providingPeersOf declaration: some SwiftSyntax.DeclSyntaxProtocol, in context: some SwiftSyntaxMacros.MacroExpansionContext) throws -> [SwiftSyntax.DeclSyntax] {
-        guard let varDecl = declaration.as(VariableDeclSyntax.self) else {
-            let classError = Diagnostic(node: declaration.root, message: GodotMacroError.requiresVar)
+        guard let variableDecl = declaration.as(VariableDeclSyntax.self) else {
+            let classError = Diagnostic(node: declaration.root, message: GodotMacroError.exportMacroNotOnVariable)
             context.diagnose(classError)
             return []
         }
-        var isOptional = false
-        guard let last = varDecl.bindings.last else {
-            throw GodotMacroError.noVariablesFound
-        }
-        guard var type = last.typeAnnotation?.type else {
-            throw GodotMacroError.noTypeFound(varDecl)
-        }
-        if let optSyntax = type.as (OptionalTypeSyntax.self) {
-            isOptional = true
-            type = optSyntax.wrappedType
-        }
-        guard let typeName = type.as (IdentifierTypeSyntax.self)?.name.text else {
-            throw GodotMacroError.unsupportedType(varDecl)
-        }
-
-        var results: [DeclSyntax] = []
-
-        for singleVar in varDecl.bindings {
-            guard let ips = singleVar.pattern.as(IdentifierPatternSyntax.self) else {
-                throw GodotMacroError.expectedIdentifier(singleVar)
+        
+        var declarations: [DeclSyntax] = []
+        
+        for binding in variableDecl.bindings {
+            guard let identifierPattern = binding.pattern.as(IdentifierPatternSyntax.self) else {
+                throw GodotMacroError.noIdentifier(binding)
             }
-            let varName = ips.identifier.text
-            let setterName = "_mproxy_set_\(varName)"
-            let getterName = "_mproxy_get_\(varName)"
             
-            if let accessors = last.accessorBlock {
-                if accessors.as (CodeBlockSyntax.self) != nil {
-                    throw MacroError.propertyGetSet
+            let identifier = identifierPattern.identifier.text
+            
+            // Probe whether this property is settable and record it in needsSetter
+            let needsSetter = Self.bindingNeedsSetter(variableDecl: variableDecl, binding: binding)
+            if needsSetter {
+                declarations.append("""
+                static func _mproxy_set_\(raw: identifier)(pInstance: UnsafeRawPointer?, arguments: borrowing SwiftGodotRuntime.Arguments) -> SwiftGodotRuntime.FastVariant? {
+                    guard let object = _unwrap(self, pInstance: pInstance) else {
+                        SwiftGodotRuntime.GD.printErr("Error calling setter for \(raw: identifier): failed to unwrap instance \\(String(describing: pInstance))")
+                        return nil
+                    }
+                
+                    SwiftGodotRuntime._invokeSetter(arguments, "\(raw: identifier)", object.\(raw: identifier)) {
+                        object.\(raw: identifier) = $0
+                    }
+                    return nil
+                }                    
+                """)
+            }
+            
+            declarations.append("""
+            static func _mproxy_get_\(raw: identifier)(pInstance: UnsafeRawPointer?, arguments: borrowing SwiftGodotRuntime.Arguments) -> SwiftGodotRuntime.FastVariant? {
+                guard let object = _unwrap(self, pInstance: pInstance) else {
+                    SwiftGodotRuntime.GD.printErr("Error calling getter for \(raw: identifier): failed to unwrap instance \\(String(describing: pInstance))")
+                    return nil
                 }
-                if let block = accessors.as (AccessorBlockSyntax.self) {
-                    var hasSet = false
-                    var hasGet = false
-                    switch block.accessors {
-                    case .accessors(let list):
-                        for accessor in list {
-                            switch accessor.accessorSpecifier.tokenKind {
-                            case .keyword(let val):
-                                switch val {
-                                case .didSet, .willSet:
-                                    hasSet = true
-                                    hasGet = true
-                                case .set:
-                                    hasSet = true
-                                case .get:
-                                    hasGet = true
-                                default:
-                                    break
-                                }
-                            default:
-                                break
-                            }
-                        }
-                    default:
-                        throw MacroError.propertyGetSet
-                    }
-                    
-                    if hasSet == false || hasGet == false {
-                        throw MacroError.propertyGetSet
-                    }
+            
+                return SwiftGodotRuntime._invokeGetter(object.\(raw: identifier))
+            }                        
+            """)
+        }
+        
+        return declarations
+    }
+    
+    /// Determines whether a binding is settable based on its syntax.
+    /// - Rules:
+    ///   - `let` bindings are never settable.
+    ///   - `var` without an accessor block is a stored property -> settable.
+    ///   - Accessor block:
+    ///       - `.getter` form is read-only -> not settable.
+    ///       - `.accessors` is settable if it contains `set`, `_modify`, `willSet`, or `didSet`.
+    private static func bindingNeedsSetter(variableDecl: VariableDeclSyntax, binding: PatternBindingSyntax) -> Bool {
+        // If it's a 'let', it's not settable
+        if case .keyword(.let) = variableDecl.bindingSpecifier.tokenKind {
+            return false
+        }
+        
+        // No accessor block => stored property => settable
+        guard let accessorBlock = binding.accessorBlock else {
+            return true
+        }
+        
+        switch accessorBlock.accessors {
+        case .getter:
+            // Shorthand getter-only computed property
+            return false
+        case .accessors(let list):
+            // If we have an explicit 'set' or '_modify', it's settable.
+            // Also consider observers (willSet/didSet) which imply write-ability for stored properties.
+            return list.contains { accessor in
+                switch accessor.accessorSpecifier.tokenKind {
+                case .keyword(.set),
+                     .keyword(._modify),
+                     .keyword(.willSet),
+                     .keyword(.didSet):
+                    return true
+                default:
+                    return false
                 }
             }
-            results.append (DeclSyntax(stringLiteral: makeSetAccessor(varName: varName, typeName: typeName, isOptional: isOptional)))
-            results.append (DeclSyntax(stringLiteral: makeGetAccessor(varName: varName, isOptional: isOptional)))
-
+        #if RESILIENT_LIBRARIES
+        @unknown default:
+            return false
+        #endif
         }
-        return results
     }
-
 }
+
