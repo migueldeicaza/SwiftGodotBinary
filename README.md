@@ -1,7 +1,7 @@
 # SwiftGodot binaries
 
 This package provides prebuilt Apple-platform binaries for
-[SwiftGodot](https://github.com/migueldeicaza/SwiftGodot) v0.76.1.
+[SwiftGodot](https://github.com/migueldeicaza/SwiftGodot) v0.77.1.
 
 Add this repository as a Swift package dependency and select either the
 `SwiftGodot` product (the complete API) or `SwiftGodotRuntime` (the smaller

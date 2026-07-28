@@ -14,23 +14,23 @@ let package = Package(
         .library(name: "SwiftGodotRuntime", targets: ["SwiftGodotRuntimeSupport"]),
     ],
     dependencies: [
-        .package(url: "https://github.com/swiftlang/swift-syntax", from: "600.0.1"),
+        .package(url: "https://github.com/swiftlang/swift-syntax", from: "603.0.2"),
     ],
     targets: [
         .binaryTarget(
             name: "SwiftGodot",
-            url: "https://github.com/migueldeicaza/SwiftGodot/releases/download/v0.76.1/SwiftGodot.xcframework.zip",
-            checksum: "7163ca4b6673fd6fc8bb61013a804c368216666dfdc55f2ea5d98a0c722cd3fb"
+            url: "https://github.com/migueldeicaza/SwiftGodot/releases/download/v0.77.1/SwiftGodot.xcframework.zip",
+            checksum: "d9832dbf986f693b893290f9d2354b056178224d98b16041fd70f32fc95356f0"
         ),
         .binaryTarget(
             name: "SwiftGodotRuntime",
-            url: "https://github.com/migueldeicaza/SwiftGodot/releases/download/v0.76.1/SwiftGodotRuntime.xcframework.zip",
-            checksum: "ee64fb494793da7e01f80c14776b6141a32945bc57013f247e9debece933fca1"
+            url: "https://github.com/migueldeicaza/SwiftGodot/releases/download/v0.77.1/SwiftGodotRuntime.xcframework.zip",
+            checksum: "1cab982b406a6927e5c7f98622df34fa3d6a26b4cc061c67bb4f11d801977884"
         ),
         .binaryTarget(
             name: "GDExtension",
-            url: "https://github.com/migueldeicaza/SwiftGodot/releases/download/v0.76.1/GDExtension.xcframework.zip",
-            checksum: "def58a14b55939fce213000ea2f0d5dee17d76265bc3f930cf04f441da3a1cbb"
+            url: "https://github.com/migueldeicaza/SwiftGodot/releases/download/v0.77.1/GDExtension.xcframework.zip",
+            checksum: "a79eda5003d0f11d139e5eacb081b40a3e70c2a39c54125b9d240e519d36143d"
         ),
         .macro(
             name: "SwiftGodotMacroLibrary",
