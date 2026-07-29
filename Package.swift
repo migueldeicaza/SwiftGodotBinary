@@ -3,6 +3,10 @@
 import CompilerPluginSupport
 import PackageDescription
 
+// SwiftGodotMacroPlugin is the SwiftGodot macro implementation, and the
+// swift-syntax it uses, prebuilt as a static library. The macro target below
+// only starts it, so this package has no swift-syntax dependency and nothing
+// here has to be compiled against a matching toolchain prebuilt.
 let package = Package(
     name: "SwiftGodot",
     platforms: [
@@ -13,37 +17,30 @@ let package = Package(
         .library(name: "SwiftGodot", targets: ["SwiftGodotSupport"]),
         .library(name: "SwiftGodotRuntime", targets: ["SwiftGodotRuntimeSupport"]),
     ],
-    dependencies: [
-        .package(url: "https://github.com/swiftlang/swift-syntax", from: "603.0.2"),
-    ],
     targets: [
         .binaryTarget(
             name: "SwiftGodot",
-            url: "https://github.com/migueldeicaza/SwiftGodot/releases/download/v0.77.1/SwiftGodot.xcframework.zip",
-            checksum: "d9832dbf986f693b893290f9d2354b056178224d98b16041fd70f32fc95356f0"
+            url: "https://github.com/migueldeicaza/SwiftGodot/releases/download/v0.77.2/SwiftGodot.xcframework.zip",
+            checksum: "c753b4cfc3636f82617db4cafb39992a9f74e01318a1e8246cfc34c3fc1a7bf4"
         ),
         .binaryTarget(
             name: "SwiftGodotRuntime",
-            url: "https://github.com/migueldeicaza/SwiftGodot/releases/download/v0.77.1/SwiftGodotRuntime.xcframework.zip",
-            checksum: "1cab982b406a6927e5c7f98622df34fa3d6a26b4cc061c67bb4f11d801977884"
+            url: "https://github.com/migueldeicaza/SwiftGodot/releases/download/v0.77.2/SwiftGodotRuntime.xcframework.zip",
+            checksum: "001d52f0280d75fa2f99629fbc79640f791ba6fa1d1c6ba2cbf22c0703a3fc61"
         ),
         .binaryTarget(
             name: "GDExtension",
-            url: "https://github.com/migueldeicaza/SwiftGodot/releases/download/v0.77.1/GDExtension.xcframework.zip",
-            checksum: "a79eda5003d0f11d139e5eacb081b40a3e70c2a39c54125b9d240e519d36143d"
+            url: "https://github.com/migueldeicaza/SwiftGodot/releases/download/v0.77.2/GDExtension.xcframework.zip",
+            checksum: "37926ccd1e263c637acee873e290fd0ce835b8ca8759d81ce9db4f362a4adaf4"
+        ),
+        .binaryTarget(
+            name: "SwiftGodotMacroPlugin",
+            url: "https://github.com/migueldeicaza/SwiftGodot/releases/download/v0.77.2/SwiftGodotMacroPlugin.xcframework.zip",
+            checksum: "853f214a2d422dd21a21e22b6d285ab038e8cf97aaaa3ffeb94d6f759c5b48b0"
         ),
         .macro(
             name: "SwiftGodotMacroLibrary",
-            dependencies: [
-                .product(name: "SwiftSyntaxMacros", package: "swift-syntax"),
-                .product(name: "SwiftSyntax", package: "swift-syntax"),
-                .product(name: "SwiftCompilerPlugin", package: "swift-syntax"),
-                .product(name: "SwiftDiagnostics", package: "swift-syntax"),
-                .product(name: "SwiftParserDiagnostics", package: "swift-syntax"),
-                .product(name: "SwiftParser", package: "swift-syntax"),
-                .product(name: "SwiftBasicFormat", package: "swift-syntax"),
-            ],
-            swiftSettings: [.swiftLanguageMode(.v5)]
+            dependencies: ["SwiftGodotMacroPlugin"]
         ),
         .target(
             name: "SwiftGodotSupport",
