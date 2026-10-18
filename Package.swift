@@ -20,23 +20,23 @@ let package = Package(
     targets: [
         .binaryTarget(
             name: "SwiftGodot",
-            url: "https://github.com/migueldeicaza/SwiftGodot/releases/download/v0.99.1/SwiftGodot.xcframework.zip",
-            checksum: "df2e2b9b0ddfe13661b31c9ca8aaa6233468a6752b3b19d34122e5d80e55884a"
+            url: "https://github.com/migueldeicaza/SwiftGodot/releases/download/v0.99.1-48-beta.1/SwiftGodot.xcframework.zip",
+            checksum: "d3f078a4982378a95f536a7f818d5f0c9d4d3a305afc3acf06a344f9e9a58287"
         ),
         .binaryTarget(
             name: "SwiftGodotRuntime",
-            url: "https://github.com/migueldeicaza/SwiftGodot/releases/download/v0.99.1/SwiftGodotRuntime.xcframework.zip",
-            checksum: "fc5c6b7409c8896870458a62e5ca69882f38d60aff25cb5cf781c945dc9edfb4"
+            url: "https://github.com/migueldeicaza/SwiftGodot/releases/download/v0.99.1-48-beta.1/SwiftGodotRuntime.xcframework.zip",
+            checksum: "11f346b049a438590654b3ff5ce6ee8bb5e07cac45db09ab0ef3e99481e0b9ad"
         ),
         .binaryTarget(
             name: "GDExtension",
-            url: "https://github.com/migueldeicaza/SwiftGodot/releases/download/v0.99.1/GDExtension.xcframework.zip",
-            checksum: "9a10a058b1abc461b6e5b7c85c01a625e5d2fb8e1a5f5b12f184d74f645d23bf"
+            url: "https://github.com/migueldeicaza/SwiftGodot/releases/download/v0.99.1-48-beta.1/GDExtension.xcframework.zip",
+            checksum: "dabfd95ce55db854255ed6973383f3c23b53dc3e8fa40c6f0bb6a9c924d77146"
         ),
         .binaryTarget(
             name: "SwiftGodotMacroPlugin",
-            url: "https://github.com/migueldeicaza/SwiftGodot/releases/download/v0.99.1/SwiftGodotMacroPlugin.xcframework.zip",
-            checksum: "5a84f80490213c7df48a86f647675187760959601c0a9175f5008cbb96a16a11"
+            url: "https://github.com/migueldeicaza/SwiftGodot/releases/download/v0.99.1-48-beta.1/SwiftGodotMacroPlugin.xcframework.zip",
+            checksum: "f7e62dcfa26a430aef10f7bc590b1eaa63ba992d7853eaa012f91e3993de4889"
         ),
         .macro(
             name: "SwiftGodotMacroLibrary",
